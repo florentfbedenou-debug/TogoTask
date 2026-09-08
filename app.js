@@ -1,127 +1,52 @@
 // ========================================
-// TOGOTASK V1
-// Prototype local
+// TOGOTASK V2
+// Connecté au serveur Node.js + PostgreSQL
 // ========================================
 
-const defaultTasks = [
-  {
-    id: 1,
-    title: "Regarder une vidéo",
-    type: "video",
-    reward: 50,
-    duration: "30 secondes"
-  },
-  {
-    id: 2,
-    title: "Répondre à une enquête",
-    type: "survey",
-    reward: 100,
-    duration: "2 minutes"
-  },
-  {
-    id: 3,
-    title: "Tester une page web",
-    type: "website",
-    reward: 75,
-    duration: "1 minute"
-  }
-];
+async function api(url, options = {}) {
+  const response = await fetch(url, {
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    },
+    ...options
+  });
 
+  let data;
 
-// ========================================
-// INITIALISATION
-// ========================================
-
-function initData() {
-
-  if (!localStorage.getItem("togotask_users")) {
-    localStorage.setItem(
-      "togotask_users",
-      JSON.stringify([])
-    );
+  try {
+    data = await response.json();
+  } catch {
+    data = {
+      success: false,
+      message: "Réponse invalide du serveur."
+    };
   }
 
-  if (!localStorage.getItem("togotask_tasks")) {
-    localStorage.setItem(
-      "togotask_tasks",
-      JSON.stringify(defaultTasks)
-    );
+  if (!response.ok) {
+    throw new Error(data.message || "Une erreur est survenue.");
   }
 
+  return data;
 }
-
-initData();
 
 
 // ========================================
-// OUTILS
+// DÉCONNEXION
 // ========================================
 
-function getUsers() {
+async function logout() {
 
-  return JSON.parse(
-    localStorage.getItem("togotask_users")
-  ) || [];
-
-}
-
-
-function saveUsers(users) {
-
-  localStorage.setItem(
-    "togotask_users",
-    JSON.stringify(users)
-  );
-
-}
-
-
-function getTasks() {
-
-  return JSON.parse(
-    localStorage.getItem("togotask_tasks")
-  ) || [];
-
-}
-
-
-function saveTasks(tasks) {
-
-  localStorage.setItem(
-    "togotask_tasks",
-    JSON.stringify(tasks)
-  );
-
-}
-
-
-function getCurrentUser() {
-
-  return JSON.parse(
-    localStorage.getItem("togotask_current_user")
-  );
-
-}
-
-
-function saveCurrentUser(user) {
-
-  localStorage.setItem(
-    "togotask_current_user",
-    JSON.stringify(user)
-  );
-
-}
-
-
-function logout() {
-
-  localStorage.removeItem(
-    "togotask_current_user"
-  );
+  try {
+    await api("/api/logout", {
+      method: "POST"
+    });
+  } catch (error) {
+    console.error(error);
+  }
 
   window.location.href = "index.html";
-
 }
 
 
@@ -134,76 +59,50 @@ const registerForm =
 
 if (registerForm) {
 
-  registerForm.addEventListener(
-    "submit",
-    function(event) {
+  registerForm.addEventListener("submit", async function(event) {
 
-      event.preventDefault();
+    event.preventDefault();
 
-      const name =
-        document.getElementById("registerName").value.trim();
+    const name =
+      document.getElementById("registerName").value.trim();
 
-      const phone =
-        document.getElementById("registerPhone").value.trim();
+    const phone =
+      document.getElementById("registerPhone").value.trim();
 
-      const password =
-        document.getElementById("registerPassword").value;
+    const password =
+      document.getElementById("registerPassword").value;
 
-      const message =
-        document.getElementById("registerMessage");
+    const message =
+      document.getElementById("registerMessage");
 
-      let users = getUsers();
+    message.textContent = "Création du compte...";
 
-      const exists =
-        users.some(
-          user => user.phone === phone
-        );
+    try {
 
-      if (exists) {
-
-        message.textContent =
-          "❌ Ce numéro possède déjà un compte.";
-
-        return;
-
-      }
-
-      const newUser = {
-
-        id: Date.now(),
-
-        name: name,
-
-        phone: phone,
-
-        password: password,
-
-        balance: 0,
-
-        completedTasks: [],
-
-        withdrawals: []
-
-      };
-
-      users.push(newUser);
-
-      saveUsers(users);
-
-      saveCurrentUser(newUser);
+      const data = await api("/api/register", {
+        method: "POST",
+        body: JSON.stringify({
+          name,
+          phone,
+          password
+        })
+      });
 
       message.textContent =
-        "✅ Compte créé avec succès !";
+        "✅ " + data.message;
 
       setTimeout(() => {
-
-        window.location.href =
-          "dashboard.html";
-
+        window.location.href = "dashboard.html";
       }, 700);
 
+    } catch (error) {
+
+      message.textContent =
+        "❌ " + error.message;
+
     }
-  );
+
+  });
 
 }
 
@@ -217,76 +116,112 @@ const loginForm =
 
 if (loginForm) {
 
-  loginForm.addEventListener(
-    "submit",
-    function(event) {
+  loginForm.addEventListener("submit", async function(event) {
 
-      event.preventDefault();
+    event.preventDefault();
 
-      const phone =
-        document.getElementById("loginPhone").value.trim();
+    const phone =
+      document.getElementById("loginPhone").value.trim();
 
-      const password =
-        document.getElementById("loginPassword").value;
+    const password =
+      document.getElementById("loginPassword").value;
 
-      const message =
-        document.getElementById("loginMessage");
+    const message =
+      document.getElementById("loginMessage");
 
-      const users = getUsers();
+    message.textContent = "Connexion...";
 
-      const user =
-        users.find(
-          user =>
-            user.phone === phone &&
-            user.password === password
-        );
+    try {
 
-      if (!user) {
-
-        message.textContent =
-          "❌ Numéro ou mot de passe incorrect.";
-
-        return;
-
-      }
-
-      saveCurrentUser(user);
+      const data = await api("/api/login", {
+        method: "POST",
+        body: JSON.stringify({
+          phone,
+          password
+        })
+      });
 
       message.textContent =
-        "✅ Connexion réussie !";
+        "✅ " + data.message;
 
       setTimeout(() => {
-
-        window.location.href =
-          "dashboard.html";
-
+        window.location.href = "dashboard.html";
       }, 500);
 
+    } catch (error) {
+
+      message.textContent =
+        "❌ " + error.message;
+
     }
-  );
+
+  });
 
 }
 
 
 // ========================================
-// PROTECTION DU DASHBOARD
+// UTILISATEUR CONNECTÉ
 // ========================================
 
-if (
-  window.location.pathname.includes("dashboard.html") ||
-  window.location.pathname.includes("tasks.html") ||
-  window.location.pathname.includes("withdrawals.html")
-) {
+async function getCurrentUser() {
 
-  const user = getCurrentUser();
+  try {
 
-  if (!user) {
+    const data = await api("/api/me");
 
-    window.location.href =
-      "index.html";
+    return data.user;
+
+  } catch (error) {
+
+    return null;
 
   }
 
+}
+
+
+// ========================================
+// PROTECTION DES PAGES
+// ========================================
+
+async function protectPage() {
+
+  const protectedPages = [
+    "dashboard.html",
+    "tasks.html",
+    "withdrawals.html",
+    "admin.html"
+  ];
+
+  const currentPage =
+    window.location.pathname.split("/").pop();
+
+  if (!protectedPages.includes(currentPage)) {
+    return;
+  }
+
+  const user = await getCurrentUser();
+
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  // Protection supplémentaire de la page admin
+  if (
+    currentPage === "admin.html" &&
+    user.role !== "admin"
+  ) {
+
+    alert("Accès administrateur refusé.");
+
+    window.location.href = "dashboard.html";
+
+    return;
+  }
+
+  return user;
 }
 
 
@@ -294,48 +229,78 @@ if (
 // DASHBOARD
 // ========================================
 
-const currentUser =
-  getCurrentUser();
-
-if (currentUser) {
+async function loadDashboard() {
 
   const welcomeUser =
     document.getElementById("welcomeUser");
 
-  if (welcomeUser) {
-
-    welcomeUser.textContent =
-      "Bonjour " + currentUser.name + " 👋";
-
-  }
-
   const balance =
     document.getElementById("balance");
-
-  if (balance) {
-
-    balance.textContent =
-      currentUser.balance + " FCFA";
-
-  }
 
   const completedTasks =
     document.getElementById("completedTasks");
 
-  if (completedTasks) {
-
-    completedTasks.textContent =
-      currentUser.completedTasks.length;
-
-  }
-
   const withdrawals =
     document.getElementById("withdrawals");
 
-  if (withdrawals) {
+  if (
+    !welcomeUser &&
+    !balance &&
+    !completedTasks &&
+    !withdrawals
+  ) {
+    return;
+  }
 
-    withdrawals.textContent =
-      currentUser.withdrawals.length;
+  const user = await getCurrentUser();
+
+  if (!user) return;
+
+  if (welcomeUser) {
+    welcomeUser.textContent =
+      "Bonjour " + user.name + " 👋";
+  }
+
+  if (balance) {
+    balance.textContent =
+      Number(user.balance).toLocaleString("fr-FR") +
+      " FCFA";
+  }
+
+  // Récupération des tâches pour connaître
+  // le nombre réellement terminé
+  try {
+
+    const data = await api("/api/tasks");
+
+    const completed =
+      data.tasks.filter(task => task.completed).length;
+
+    if (completedTasks) {
+      completedTasks.textContent = completed;
+    }
+
+  } catch (error) {
+
+    console.error(error);
+
+  }
+
+  // Nombre de retraits
+  try {
+
+    const data = await api("/api/withdrawals");
+
+    if (withdrawals) {
+      withdrawals.textContent =
+        data.withdrawals.length;
+    }
+
+  } catch (error) {
+
+    if (withdrawals) {
+      withdrawals.textContent = "0";
+    }
 
   }
 
@@ -343,79 +308,348 @@ if (currentUser) {
 
 
 // ========================================
-// AFFICHAGE DES TÂCHES
+// TÂCHES
 // ========================================
 
-const taskList =
-  document.getElementById("taskList");
+async function loadTasks() {
 
-if (taskList) {
+  const taskList =
+    document.getElementById("taskList");
 
-  const tasks = getTasks();
+  if (!taskList) return;
 
-  const user = getCurrentUser();
+  taskList.innerHTML =
+    "<p>Chargement des tâches...</p>";
 
-  taskList.innerHTML = "";
+  try {
 
-  tasks.forEach(task => {
+    const data =
+      await api("/api/tasks");
 
-    const alreadyDone =
-      user.completedTasks.includes(task.id);
+    taskList.innerHTML = "";
 
-    const card =
-      document.createElement("div");
+    if (!data.tasks.length) {
 
-    card.className =
-      "task-card";
+      taskList.innerHTML =
+        "<p>Aucune tâche disponible pour le moment.</p>";
 
-    card.innerHTML = `
+      return;
+    }
 
-      <div class="task-top">
+    data.tasks.forEach(task => {
 
-        <span class="task-category">
-          ${getTaskIcon(task.type)}
-          ${getTaskType(task.type)}
-        </span>
+      const card =
+        document.createElement("div");
 
-        <strong>
-          +${task.reward} FCFA
-        </strong>
+      card.className =
+        "task-card";
 
-      </div>
+      const icon =
+        getTaskIcon(task.type);
 
-      <h3>
-        ${task.title}
-      </h3>
+      const type =
+        getTaskType(task.type);
 
-      <p>
-        Réalise cette tâche pour recevoir
-        une récompense de démonstration.
-      </p>
+      card.innerHTML = `
 
-      <div class="task-footer">
+        <div class="task-top">
 
-        <span>
-          ⏱️ ${task.duration}
-        </span>
+          <span class="task-category">
+            ${icon} ${type}
+          </span>
 
-        <button
-          class="btn-small"
-          onclick="completeTask(${task.id})"
-          ${alreadyDone ? "disabled" : ""}
-        >
-          ${alreadyDone ? "Terminée ✓" : "Commencer"}
-        </button>
+          <strong>
+            +${Number(task.reward).toLocaleString("fr-FR")} FCFA
+          </strong>
 
-      </div>
+        </div>
 
-    `;
+        <h3>
+          ${escapeHTML(task.title)}
+        </h3>
 
-    taskList.appendChild(card);
+        <p>
+          Réalise cette tâche pour obtenir
+          la récompense indiquée.
+        </p>
+
+        <div class="task-footer">
+
+          <span>
+            ⏱️ ${escapeHTML(task.duration || "—")}
+          </span>
+
+          ${
+            task.completed
+            ?
+            `<button class="btn-small" disabled>
+              Terminée ✓
+            </button>`
+            :
+            `<button
+              class="btn-small"
+              onclick="completeTask(${task.id})"
+            >
+              Commencer
+            </button>`
+          }
+
+        </div>
+
+      `;
+
+      taskList.appendChild(card);
+
+    });
+
+  } catch (error) {
+
+    taskList.innerHTML =
+      `<p>❌ ${escapeHTML(error.message)}</p>`;
+
+  }
+
+}
+
+
+// ========================================
+// TERMINER UNE TÂCHE
+// ========================================
+
+async function completeTask(taskId) {
+
+  const confirmation =
+    confirm(
+      "Confirmer que tu veux terminer cette tâche ?"
+    );
+
+  if (!confirmation) return;
+
+  try {
+
+    const data =
+      await api(
+        `/api/tasks/${taskId}/complete`,
+        {
+          method: "POST"
+        }
+      );
+
+    alert(
+      "✅ Tâche terminée ! +" +
+      data.reward +
+      " FCFA"
+    );
+
+    window.location.reload();
+
+  } catch (error) {
+
+    alert(
+      "❌ " + error.message
+    );
+
+  }
+
+}
+
+
+// ========================================
+// RETRAIT
+// ========================================
+
+async function loadWithdrawPage() {
+
+  const form =
+    document.getElementById("withdrawForm");
+
+  if (!form) return;
+
+  const user =
+    await getCurrentUser();
+
+  if (!user) return;
+
+  const balance =
+    document.getElementById("withdrawBalance");
+
+  if (balance) {
+
+    balance.textContent =
+      Number(user.balance).toLocaleString("fr-FR") +
+      " FCFA";
+
+  }
+
+  form.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    const amount =
+      Number(
+        document.getElementById("withdrawAmount").value
+      );
+
+    const method =
+      document.getElementById("paymentMethod").value;
+
+    const paymentNumber =
+      document.getElementById("paymentNumber")
+        .value
+        .trim();
+
+    const message =
+      document.getElementById("withdrawMessage");
+
+    message.textContent =
+      "Enregistrement de la demande...";
+
+    try {
+
+      const data =
+        await api("/api/withdrawals", {
+
+          method: "POST",
+
+          body: JSON.stringify({
+            amount,
+            method,
+            paymentNumber
+          })
+
+        });
+
+      message.textContent =
+        "✅ " + data.message;
+
+      form.reset();
+
+      const updatedUser =
+        await getCurrentUser();
+
+      if (updatedUser && balance) {
+
+        balance.textContent =
+          Number(updatedUser.balance)
+            .toLocaleString("fr-FR") +
+          " FCFA";
+
+      }
+
+    } catch (error) {
+
+      message.textContent =
+        "❌ " + error.message;
+
+    }
 
   });
 
 }
 
+
+// ========================================
+// ADMIN
+// ========================================
+
+async function loadAdmin() {
+
+  const taskForm =
+    document.getElementById("taskForm");
+
+  if (!taskForm) return;
+
+  const user =
+    await getCurrentUser();
+
+  if (!user || user.role !== "admin") return;
+
+  try {
+
+    const data =
+      await api("/api/admin/stats");
+
+    const adminUsers =
+      document.getElementById("adminUsers");
+
+    const adminRewards =
+      document.getElementById("adminRewards");
+
+    if (adminUsers) {
+      adminUsers.textContent =
+        data.users;
+    }
+
+    if (adminRewards) {
+      adminRewards.textContent =
+        Number(data.rewards)
+          .toLocaleString("fr-FR") +
+        " FCFA";
+    }
+
+  } catch (error) {
+
+    console.error(error);
+
+  }
+
+
+  taskForm.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    const title =
+      document.getElementById("taskTitle")
+        .value
+        .trim();
+
+    const reward =
+      Number(
+        document.getElementById("taskReward").value
+      );
+
+    const type =
+      document.getElementById("taskType").value;
+
+    const message =
+      document.getElementById("adminMessage");
+
+    try {
+
+      const data =
+        await api("/api/admin/tasks", {
+
+          method: "POST",
+
+          body: JSON.stringify({
+            title,
+            reward,
+            type,
+            duration: "1 minute"
+          })
+
+        });
+
+      message.textContent =
+        "✅ " + data.message;
+
+      taskForm.reset();
+
+    } catch (error) {
+
+      message.textContent =
+        "❌ " + error.message;
+
+    }
+
+  });
+
+}
+
+
+// ========================================
+// OUTILS
+// ========================================
 
 function getTaskIcon(type) {
 
@@ -426,7 +660,6 @@ function getTaskIcon(type) {
   if (type === "website") return "🌐";
 
   return "📋";
-
 }
 
 
@@ -439,290 +672,60 @@ function getTaskType(type) {
   if (type === "website") return "Site web";
 
   return "Tâche";
+}
 
+
+function escapeHTML(value) {
+
+  const div =
+    document.createElement("div");
+
+  div.textContent =
+    value ?? "";
+
+  return div.innerHTML;
 }
 
 
 // ========================================
-// TERMINER UNE TÂCHE
+// DÉMARRAGE
 // ========================================
 
-function completeTask(taskId) {
+(async function() {
 
   const user =
-    getCurrentUser();
-
-  const tasks =
-    getTasks();
-
-  const task =
-    tasks.find(
-      task => task.id === taskId
-    );
-
-  if (!task) return;
+    await protectPage();
 
   if (
-    user.completedTasks.includes(taskId)
+    window.location.pathname.includes("dashboard.html")
   ) {
 
-    alert(
-      "Cette tâche est déjà terminée."
-    );
-
-    return;
+    await loadDashboard();
 
   }
 
-  const confirmation =
-    confirm(
-      "Terminer cette tâche de démonstration ?"
-    );
+  if (
+    window.location.pathname.includes("tasks.html")
+  ) {
 
-  if (!confirmation) return;
-
-  user.balance += task.reward;
-
-  user.completedTasks.push(taskId);
-
-  updateUser(user);
-
-  alert(
-    `Tâche terminée ! +${task.reward} FCFA`
-  );
-
-  window.location.reload();
-
-}
-
-
-// ========================================
-// MISE À JOUR UTILISATEUR
-// ========================================
-
-function updateUser(user) {
-
-  const users =
-    getUsers();
-
-  const index =
-    users.findIndex(
-      item => item.id === user.id
-    );
-
-  if (index !== -1) {
-
-    users[index] = user;
-
-    saveUsers(users);
+    await loadTasks();
 
   }
 
-  saveCurrentUser(user);
+  if (
+    window.location.pathname.includes("withdrawals.html")
+  ) {
 
-}
+    await loadWithdrawPage();
 
+  }
 
-// ========================================
-// RETRAIT
-// ========================================
+  if (
+    window.location.pathname.includes("admin.html")
+  ) {
 
-const withdrawForm =
-  document.getElementById("withdrawForm");
+    await loadAdmin();
 
-if (withdrawForm) {
+  }
 
-  const user =
-    getCurrentUser();
-
-  const withdrawBalance =
-    document.getElementById(
-      "withdrawBalance"
-    );
-
-  withdrawBalance.textContent =
-    user.balance + " FCFA";
-
-
-  withdrawForm.addEventListener(
-    "submit",
-    function(event) {
-
-      event.preventDefault();
-
-      const amount =
-        Number(
-          document.getElementById(
-            "withdrawAmount"
-          ).value
-        );
-
-      const method =
-        document.getElementById(
-          "paymentMethod"
-        ).value;
-
-      const number =
-        document.getElementById(
-          "paymentNumber"
-        ).value.trim();
-
-      const message =
-        document.getElementById(
-          "withdrawMessage"
-        );
-
-
-      if (amount < 1000) {
-
-        message.textContent =
-          "❌ Le minimum de démonstration est 1 000 FCFA.";
-
-        return;
-
-      }
-
-
-      if (amount > user.balance) {
-
-        message.textContent =
-          "❌ Solde insuffisant.";
-
-        return;
-
-      }
-
-
-      user.withdrawals.push({
-
-        id: Date.now(),
-
-        amount: amount,
-
-        method: method,
-
-        number: number,
-
-        status: "Démonstration"
-
-      });
-
-
-      user.balance -= amount;
-
-      updateUser(user);
-
-
-      message.textContent =
-        "✅ Demande enregistrée en mode démonstration.";
-
-      withdrawForm.reset();
-
-      withdrawBalance.textContent =
-        user.balance + " FCFA";
-
-    }
-  );
-
-}
-
-
-// ========================================
-// ADMIN
-// ========================================
-
-const taskForm =
-  document.getElementById("taskForm");
-
-if (taskForm) {
-
-  const users =
-    getUsers();
-
-  document.getElementById(
-    "adminUsers"
-  ).textContent =
-    users.length;
-
-
-  let totalRewards = 0;
-
-  users.forEach(user => {
-
-    user.completedTasks.forEach(taskId => {
-
-      const task =
-        getTasks().find(
-          task => task.id === taskId
-        );
-
-      if (task) {
-
-        totalRewards += task.reward;
-
-      }
-
-    });
-
-  });
-
-
-  document.getElementById(
-    "adminRewards"
-  ).textContent =
-    totalRewards + " FCFA";
-
-
-  taskForm.addEventListener(
-    "submit",
-    function(event) {
-
-      event.preventDefault();
-
-      const title =
-        document.getElementById(
-          "taskTitle"
-        ).value.trim();
-
-      const reward =
-        Number(
-          document.getElementById(
-            "taskReward"
-          ).value
-        );
-
-      const type =
-        document.getElementById(
-          "taskType"
-        ).value;
-
-      const tasks =
-        getTasks();
-
-      tasks.push({
-
-        id: Date.now(),
-
-        title: title,
-
-        reward: reward,
-
-        type: type,
-
-        duration: "1 minute"
-
-      });
-
-      saveTasks(tasks);
-
-      document.getElementById(
-        "adminMessage"
-      ).textContent =
-        "✅ Tâche ajoutée.";
-
-      taskForm.reset();
-
-    }
-  );
-
-}
+})();
