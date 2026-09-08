@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>TogoTask - Retrait</title>
+
+  <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<header class="dashboard-header">
+
+  <a href="dashboard.html" class="logo">
+    Togo<span>Task</span>
+  </a>
+
+  <a href="dashboard.html" class="btn btn-outline">
+    Retour
+  </a>
+
+</header>
+
+<main class="dashboard">
+
+  <div class="withdraw-container">
+
+    <div class="withdraw-card">
+
+      <span class="small-title">RETRAIT</span>
+
+      <h1>Demander un retrait</h1>
+
+      <p class="warning">
+        ⚠️ Cette version est un prototype.
+        Aucun paiement réel n'est effectué.
+      </p>
+
+      <div class="current-balance">
+
+        <span>Solde actuel</span>
+
+        <strong id="withdrawBalance">
+          0 FCFA
+        </strong>
+
+      </div>
+
+      <form id="withdrawForm">
+
+        <label>Montant</label>
+
+        <input
+          id="withdrawAmount"
+          type="number"
+          min="1000"
+          placeholder="Ex : 1000"
+          required
+        >
+
+        <label>Moyen de paiement</label>
+
+        <select id="paymentMethod">
+
+          <option value="tmoney">
+            TMoney
+          </option>
+
+          <option value="flooz">
+            Flooz
+          </option>
+
+        </select>
+
+        <label>Numéro de paiement</label>
+
+        <input
+          id="paymentNumber"
+          type="tel"
+          placeholder="+228..."
+          required
+        >
+
+        <button
+          type="submit"
+          class="btn btn-primary full"
+        >
+          Demander le retrait
+        </button>
+
+      </form>
+
+      <p id="withdrawMessage" class="message"></p>
+
+    </div>
+
+  </div>
+
+</main>
+
+<script src="app.js"></script>
+
+</body>
+
+</html>

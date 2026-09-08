@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>TogoTask - Administration</title>
+
+  <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<header class="dashboard-header">
+
+  <div class="logo">
+    Togo<span>Task</span> Admin
+  </div>
+
+  <a href="dashboard.html" class="btn btn-outline">
+    Site
+  </a>
+
+</header>
+
+<main class="dashboard">
+
+  <div class="dashboard-title">
+
+    <div>
+      <span class="small-title">ADMINISTRATION</span>
+
+      <h1>Gestion de TogoTask ⚙️</h1>
+    </div>
+
+  </div>
+
+  <div class="stats-grid">
+
+    <div class="stat-card">
+
+      <div class="stat-icon">
+        👥
+      </div>
+
+      <span>Utilisateurs</span>
+
+      <strong id="adminUsers">
+        0
+      </strong>
+
+    </div>
+
+    <div class="stat-card">
+
+      <div class="stat-icon">
+        🎬
+      </div>
+
+      <span>Tâches</span>
+
+      <strong>
+        3
+      </strong>
+
+    </div>
+
+    <div class="stat-card">
+
+      <div class="stat-icon">
+        💰
+      </div>
+
+      <span>Récompenses distribuées</span>
+
+      <strong id="adminRewards">
+        0 FCFA
+      </strong>
+
+    </div>
+
+  </div>
+
+  <section class="admin-section">
+
+    <h2>Créer une tâche</h2>
+
+    <form id="taskForm" class="admin-form">
+
+      <input
+        id="taskTitle"
+        type="text"
+        placeholder="Nom de la tâche"
+        required
+      >
+
+      <input
+        id="taskReward"
+        type="number"
+        placeholder="Récompense en FCFA"
+        required
+      >
+
+      <select id="taskType">
+
+        <option value="video">
+          🎬 Vidéo
+        </option>
+
+        <option value="survey">
+          📝 Enquête
+        </option>
+
+        <option value="website">
+          🌐 Site web
+        </option>
+
+      </select>
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+      >
+        Ajouter la tâche
+      </button>
+
+    </form>
+
+    <p id="adminMessage" class="message"></p>
+
+  </section>
+
+</main>
+
+<script src="app.js"></script>
+
+</body>
+
+</html>

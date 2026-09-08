@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>TogoTask - Tableau de bord</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="dashboard-header">
+
+  <div class="logo">Togo<span>Task</span></div>
+
+  <div class="user-menu">
+    <span id="welcomeUser">Bonjour 👋</span>
+    <button onclick="logout()" class="logout-btn">Déconnexion</button>
+  </div>
+
+</header>
+
+<main class="dashboard">
+
+  <div class="dashboard-title">
+    <div>
+      <span class="small-title">TABLEAU DE BORD</span>
+      <h1>Bienvenue sur TogoTask 👋</h1>
+    </div>
+
+    <a href="tasks.html" class="btn btn-primary">
+      Voir les tâches
+    </a>
+  </div>
+
+  <div class="stats-grid">
+
+    <div class="stat-card">
+      <div class="stat-icon">💰</div>
+      <span>Solde</span>
+      <strong id="balance">0 FCFA</strong>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">🎬</div>
+      <span>Tâches disponibles</span>
+      <strong>12</strong>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <span>Tâches terminées</span>
+      <strong id="completedTasks">0</strong>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">💳</div>
+      <span>Retraits</span>
+      <strong id="withdrawals">0</strong>
+    </div>
+
+  </div>
+
+  <section class="dashboard-section">
+
+    <div class="section-heading">
+      <div>
+        <h2>Tâches disponibles</h2>
+        <p>Découvre les dernières missions.</p>
+      </div>
+
+      <a href="tasks.html">Voir tout →</a>
+    </div>
+
+    <div class="task-grid">
+
+      <div class="task-card">
+
+        <div class="task-top">
+          <span class="task-category">🎬 Vidéo</span>
+          <strong>+50 FCFA</strong>
+        </div>
+
+        <h3>Regarder une vidéo</h3>
+
+        <p>
+          Regarde la vidéo jusqu'à la fin pour terminer cette tâche.
+        </p>
+
+        <div class="task-footer">
+          <span>⏱️ 30 secondes</span>
+          <a href="tasks.html" class="btn-small">Commencer</a>
+        </div>
+
+      </div>
+
+      <div class="task-card">
+
+        <div class="task-top">
+          <span class="task-category">📝 Enquête</span>
+          <strong>+100 FCFA</strong>
+        </div>
+
+        <h3>Répondre à une enquête</h3>
+
+        <p>
+          Donne ton avis sur un sujet proposé par le partenaire.
+        </p>
+
+        <div class="task-footer">
+          <span>⏱️ 2 min</span>
+          <a href="tasks.html" class="btn-small">Commencer</a>
+        </div>
+
+      </div>
+
+      <div class="task-card">
+
+        <div class="task-top">
+          <span class="task-category">🌐 Test</span>
+          <strong>+75 FCFA</strong>
+        </div>
+
+        <h3>Tester une page web</h3>
+
+        <p>
+          Découvre une page et donne ton retour.
+        </p>
+
+        <div class="task-footer">
+          <span>⏱️ 1 min</span>
+          <a href="tasks.html" class="btn-small">Commencer</a>
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</main>
+
+<script src="app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TogoTask - Gagnez en réalisant des tâches</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="navbar">
+  <div class="logo">Togo<span>Task</span></div>
+
+  <div class="nav-buttons">
+    <a href="#connexion" class="btn btn-outline">Connexion</a>
+    <a href="#inscription" class="btn btn-primary">S'inscrire</a>
+  </div>
+</header>
+
+<section class="hero">
+
+  <div class="hero-content">
+    <span class="badge">🚀 Nouvelle plateforme de micro-tâches</span>
+
+    <h1>
+      Réalise des tâches.<br>
+      <span>Gagne des récompenses.</span>
+    </h1>
+
+    <p>
+      TogoTask permet de découvrir des missions simples
+      et de suivre tes récompenses depuis un seul tableau de bord.
+    </p>
+
+    <div class="hero-buttons">
+      <a href="#inscription" class="btn btn-primary btn-large">
+        Commencer maintenant
+      </a>
+
+      <a href="#fonctionnement" class="btn btn-outline btn-large">
+        Comment ça marche ?
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-card">
+    <div class="balance-title">Solde disponible</div>
+
+    <div class="balance">2 500 FCFA</div>
+
+    <div class="balance-small">
+      Prototype — crédits de démonstration
+    </div>
+
+    <div class="mini-stats">
+      <div>
+        <strong>12</strong>
+        <span>Tâches</span>
+      </div>
+
+      <div>
+        <strong>8</strong>
+        <span>Terminées</span>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<section id="fonctionnement" class="section">
+
+  <div class="section-title">
+    <span>COMMENT ÇA MARCHE ?</span>
+    <h2>Simple et facile</h2>
+  </div>
+
+  <div class="steps">
+
+    <div class="step-card">
+      <div class="step-icon">👤</div>
+      <h3>1. Crée ton compte</h3>
+      <p>Inscris-toi gratuitement et accède à ton espace personnel.</p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-icon">🎬</div>
+      <h3>2. Réalise des tâches</h3>
+      <p>Découvre les tâches disponibles et réalise celles qui t'intéressent.</p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-icon">💰</div>
+      <h3>3. Suis tes récompenses</h3>
+      <p>Consulte ton solde et ton historique depuis ton tableau de bord.</p>
+    </div>
+
+  </div>
+
+</section>
+
+<section id="inscription" class="auth-section">
+
+  <div class="auth-card">
+
+    <h2>Créer un compte</h2>
+    <p>Commence avec ton compte TogoTask.</p>
+
+    <form id="registerForm">
+
+      <label>Nom</label>
+      <input id="registerName" type="text" placeholder="Ton nom" required>
+
+      <label>Numéro de téléphone</label>
+      <input id="registerPhone" type="tel" placeholder="+228..." required>
+
+      <label>Mot de passe</label>
+      <input id="registerPassword" type="password" placeholder="Mot de passe" required>
+
+      <button class="btn btn-primary full" type="submit">
+        Créer mon compte
+      </button>
+
+    </form>
+
+    <p id="registerMessage" class="message"></p>
+
+  </div>
+
+</section>
+
+<section id="connexion" class="auth-section">
+
+  <div class="auth-card">
+
+    <h2>Connexion</h2>
+    <p>Accède à ton espace TogoTask.</p>
+
+    <form id="loginForm">
+
+      <label>Numéro de téléphone</label>
+      <input id="loginPhone" type="tel" placeholder="+228..." required>
+
+      <label>Mot de passe</label>
+      <input id="loginPassword" type="password" placeholder="Mot de passe" required>
+
+      <button class="btn btn-primary full" type="submit">
+        Se connecter
+      </button>
+
+    </form>
+
+    <p id="loginMessage" class="message"></p>
+
+  </div>
+
+</section>
+
+<footer>
+  <div class="logo">Togo<span>Task</span></div>
+  <p>© 2026 TogoTask — Prototype V1</p>
+</footer>
+
+<script src="app.js"></script>
+
+</body>
+</html>
