@@ -82,6 +82,9 @@ function adminOnly(req, res, next) {
 
 
 /*
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 ========================================
 TEST SERVEUR
 ========================================
