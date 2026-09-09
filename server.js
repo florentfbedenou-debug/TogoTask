@@ -362,14 +362,6 @@ app.get("/api/tasks", auth, async (req, res) => {
 ========================================
 TERMINER UNE TÂCHE
 ========================================
-
-IMPORTANT :
-Pour le moment, cette route représente une
-validation DEMO côté serveur.
-
-Elle ne vérifie pas encore qu'une vidéo,
-enquête ou visite a réellement été effectuée.
-========================================
 */
 
 app.post("/api/tasks/:id/complete", auth, async (req, res) => {
@@ -534,15 +526,6 @@ app.get("/api/withdrawals", auth, async (req, res) => {
 /*
 ========================================
 CRÉER UNE DEMANDE DE RETRAIT
-========================================
-
-Pour la V2 :
-- la demande est enregistrée ;
-- le solde est réservé/déduit ;
-- le statut reste "pending".
-
-Aucun paiement réel T-Money/Flooz n'est
-effectué par cette route pour le moment.
 ========================================
 */
 
@@ -810,6 +793,69 @@ app.post(
 
 /*
 ========================================
+CRÉATION AUTOMATIQUE DES TABLES
+========================================
+*/
+
+async function initDatabase() {
+
+    await query(`
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            phone VARCHAR(30) UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            balance INTEGER NOT NULL DEFAULT 0,
+            role VARCHAR(20) NOT NULL DEFAULT 'user',
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS tasks (
+            id SERIAL PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            type VARCHAR(30) NOT NULL,
+            reward INTEGER NOT NULL CHECK (reward >= 0),
+            duration VARCHAR(100),
+            video_url TEXT,
+            active BOOLEAN NOT NULL DEFAULT TRUE,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS task_completions (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+            reward INTEGER NOT NULL,
+            completed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(user_id, task_id)
+        );
+
+        CREATE TABLE IF NOT EXISTS withdrawals (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            amount INTEGER NOT NULL CHECK (amount > 0),
+            method VARCHAR(30) NOT NULL,
+            payment_number VARCHAR(30) NOT NULL,
+            status VARCHAR(30) NOT NULL DEFAULT 'pending',
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS transactions (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            type VARCHAR(30) NOT NULL,
+            amount INTEGER NOT NULL,
+            description TEXT,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+    `);
+
+    console.log("✅ Tables PostgreSQL vérifiées/créées.");
+}
+
+
+/*
+========================================
 TÂCHES PAR DÉFAUT
 ========================================
 */
@@ -879,6 +925,8 @@ async function startServer() {
         await query("SELECT NOW()");
 
         console.log("✅ PostgreSQL connecté.");
+
+        await initDatabase();
 
         await seedTasks();
 
